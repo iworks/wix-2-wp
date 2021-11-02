@@ -1,0 +1,25 @@
+{
+    "service": "default",
+    "runners": {
+        "parse":      true
+    },
+    "database": {
+        "dbhost": "localhost",
+        "dbname": "wordpress",
+        "dbuser": "root1",
+        "dbpass": "",
+        "exec_on_connect": "SET CHARACTER_SET_RESULTS=UTF8"
+    },
+    "site": {
+        "title": "",
+        "link": "",
+        "description": "",
+        "wp_prefix": "wp_"
+    },
+    "mode": "file",
+    "posts": {
+        "limit": 0,
+        "random": false
+    }
+}
+
