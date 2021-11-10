@@ -37,29 +37,24 @@ class iworks_default_parse extends iworks_default_common {
 			$this->wxr->mode = 'return';
 			$content         = '';
 			foreach ( $this->items as $one ) {
-
 				if ( 0 == $this->counter || 0 == $this->counter % $this->split ) {
 					if ( $content ) {
 						$content .= $this->wxr->foot();
-
-						$file = sprintf( '/tmp/import.news.%03d.xml', $this->counter / $this->split );
+						$file     = sprintf( '/tmp/import.news.%03d.xml', $this->counter / $this->split );
 						print $file . PHP_EOL;
 						$fw = fopen( $file, 'w' );
 						fputs( $fw, $content, strlen( $content ) );
 						fclose( $fw );
 					}
-
 					$content = $this->wxr->head();
 					if ( 0 == $this->counter ) {
-						$content .= $this->wxr->categories( 'Nowości', 'nowosci', $this->categories );
+						$content .= $this->wxr->categories( $this->categories );
 					}
 				}
-
 				if ( isset( $this->users[ $one['author_id'] ] ) ) {
 					$content .= $this->wxr->author( $this->users[ $one['author_id'] ] );
 				}
 				$content .= $this->wxr->item( $one );
-
 				$this->counter++;
 			}
 			$content .= $this->wxr->foot();
@@ -73,12 +68,14 @@ class iworks_default_parse extends iworks_default_common {
 
 	protected function get_items() {
 		global $options;
-		$data  = array();
-		$doc   = new DOMDocument();
-		$files = $this->dir_to_array( $options['d'] );
+		$post_id = 948;
+		$data    = array();
+		$doc     = new DOMDocument();
+		$files   = $this->dir_to_array( $options['d'] );
+		// $files = array_slice( $files, 0, 10 );
 		foreach ( $files as $file ) {
 			$item = array(
-				'post_id'    => 0,
+				'post_id'    => ++$post_id,
 				'categories' => $this->categories,
 			);
 			$f    = $options['d'] . DIRECTORY_SEPARATOR . $file;
@@ -93,6 +90,19 @@ class iworks_default_parse extends iworks_default_common {
 					$item['post_name'] = slugify( $value );
 				}
 			}
+			/**
+			 * gett thumbnail_path
+			 */
+			foreach ( $doc->getElementsByTagName( 'img' ) as $element ) {
+				if ( $element->getAttribute( 'data-pin-media' ) ) {
+					$value                   = $element->getAttribute( 'src' );
+					$item['thumbnail_title'] = $item['title'];
+					$item['thumbnail_id']    = ++$post_id;
+					$item['thumbnail_path']  = preg_replace( '@/v1/fit.+$@', '', $value );
+					$item['thumbnail_slug']  = crc32( $value );
+				}
+			}
+
 			/**
 			 * get content
 			 */
@@ -111,7 +121,7 @@ class iworks_default_parse extends iworks_default_common {
 				switch ( $element->getAttribute( 'data-hook' ) ) {
 					case 'user-name':
 						$item['author_id'] = $this->get_user_id_from_string( $element->nodeValue );
-						$item['creator']   = $element->nodeValue;
+						$item['creator']   = $this->users[ $this->get_user_id_from_string( $element->nodeValue ) ]['author_login'];
 						break;
 					case 'time-ago':
 						$value             = date( 'Y-m-d H:i:s', strtotime( $this->convert_date( $element->nodeValue ) ) );
@@ -126,9 +136,12 @@ class iworks_default_parse extends iworks_default_common {
 			// tags_input
 			foreach ( $doc->getElementsByTagName( 'nav' ) as $element ) {
 				if ( 'tags' === $element->getAttribute( 'aria-label' ) ) {
-					$item['tags_input'] = array();
+					$item['tags'] = array();
 					foreach ( $element->getElementsByTagName( 'a' ) as $el ) {
-						$item['tags_input'][] = preg_replace( '/_/', ' ', $el->nodeValue );
+						$item['tags'][] = array(
+							'nicename' => preg_replace( '/_/', '-', $el->nodeValue ),
+							'content'  => preg_replace( '/_/', '-', $el->nodeValue ),
+						);
 					}
 				}
 			}

@@ -11,9 +11,9 @@
         "exec_on_connect": "SET CHARACTER_SET_RESULTS=UTF8"
     },
     "site": {
-        "title": "",
-        "link": "",
-        "description": "",
+        "title": "SEDNO",
+        "link": "https://www.sedno.org/",
+        "description": "Stowarzyszenie Europejska Demokracja - Nadzieja i Otwartość",
         "wp_prefix": "wp_"
     },
     "mode": "split",
