@@ -16,7 +16,7 @@
         "description": "",
         "wp_prefix": "wp_"
     },
-    "mode": "file",
+    "mode": "split",
     "posts": {
         "limit": 0,
         "random": false
