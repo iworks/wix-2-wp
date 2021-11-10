@@ -34,13 +34,17 @@ class iworks_default_parse extends iworks_default_common {
 			$this->wxr->foot();
 		}
 		if ( 'split' == $mode ) {
+			global $config;
+			if ( isset( $config->posts ) && isset( $config->posts->limit ) ) {
+				$this->split = $config->posts->limit;
+			}
 			$this->wxr->mode = 'return';
 			$content         = '';
 			foreach ( $this->items as $one ) {
 				if ( 0 == $this->counter || 0 == $this->counter % $this->split ) {
 					if ( $content ) {
 						$content .= $this->wxr->foot();
-						$file     = sprintf( '/tmp/import.news.%03d.xml', $this->counter / $this->split );
+						$file     = sprintf( '/tmp/import.news.%03d.xml', ceil( $this->counter / $this->split ) );
 						print $file . PHP_EOL;
 						$fw = fopen( $file, 'w' );
 						fputs( $fw, $content, strlen( $content ) );
@@ -58,7 +62,7 @@ class iworks_default_parse extends iworks_default_common {
 				$this->counter++;
 			}
 			$content .= $this->wxr->foot();
-			$file     = sprintf( '/tmp/import.news.%03d.xml', $this->counter / $this->split );
+			$file     = sprintf( '/tmp/import.news.%03d.xml', ceil( $this->counter / $this->split ) );
 			print $file . PHP_EOL;
 			$fw = fopen( $file, 'w' );
 			fputs( $fw, $content, strlen( $content ) );
