@@ -10,12 +10,16 @@ abstract class iworks_wix2wp_common {
 	protected $random = false;
 	protected $users  = array();
 	protected $config;
+	protected $root;
+
+	private $orginal_images = array();
 
 	public function __construct() {
 		global $config;
 		$this->config = $config;
 		$this->db     = new iworks_default();
 		$this->wxr    = new iworks_wxr();
+		$this->root   = dirname( dirname( dirname( dirname( __FILE__ ) ) ) );
 	}
 
 	abstract protected function get_items();
@@ -89,21 +93,16 @@ abstract class iworks_wix2wp_common {
 				// echo $child->hasChildNodes(), PHP_EOL;
 				switch ( $child->tagName ) {
 					case 'style':
+					case 'svg':
 						break;
 					case 'div':
-						if ( 'imageViewer' === $child->getAttribute( 'data-hook' ) ) {
-							$innerHTML .= '<div class="image-viewer">';
-							$innerHTML .= $this->get_inner_html( $child, $mode );
-							$innerHTML .= '</div>';
-						} else {
-							$innerHTML .= $this->get_inner_html( $child, $mode );
-						}
+						$innerHTML .= $this->get_inner_html( $child, $mode );
+						break;
+					case 'img':
+						$innerHTML .= $this->gutenberg_tag_img( $child );
 						break;
 					case 'p':
-						$innerHTML .= $child->ownerDocument->saveXML( $this->remove_attributes( $child ) );
-						$innerHTML  = preg_replace( '@<span><br role="presentation"/></span>@', '', $innerHTML );
-						$innerHTML  = preg_replace( '@<span[^>]+>@', '', $innerHTML );
-						$innerHTML  = preg_replace( '@</span>@', '', $innerHTML );
+						$innerHTML .= $this->gutenberg_tag_p( $child );
 						break;
 					case 'span':
 					case 'li':
@@ -173,5 +172,60 @@ abstract class iworks_wix2wp_common {
 		global $wpdb;
 		$query = "select max(ID) + 1 from {$wpdb->posts}";
 		$var   = $wpdb->gett_var( $query );
+	}
+
+	protected function gutenberg_tag_img( $child ) {
+		if ( 'img' !== $child->tagName ) {
+			return '';
+		}
+		$src = $child->getAttribute( 'src' );
+		if ( empty( $src ) ) {
+			return '';
+		}
+		$src                    = preg_replace( '@/v1/fit/.*$@', '', $src );
+		$this->orginal_images[] = $src;
+		$src                    = preg_replace( '@https://static.wixstatic.com@', '', $src );
+		$content                = '<!-- wp:image {"sizeSlug":"large"} -->';
+		$content               .= PHP_EOL;
+		$content               .= sprintf(
+			'<figure class="wp-block-image size-large"><img src="%s" alt="%s"/></figure>',
+			$src,
+			$child->getAttribute( 'alt' )
+		);
+		$content               .= PHP_EOL;
+		$content               .= '<!-- /wp:image -->';
+		$content               .= PHP_EOL;
+		$content               .= PHP_EOL;
+		return $content;
+	}
+
+	protected function gutenberg_tag_p( $child ) {
+		if ( 'p' !== $child->tagName ) {
+			return '';
+		}
+		$paragraph = $child->ownerDocument->saveXML( $this->remove_attributes( $child ) );
+		$paragraph = preg_replace( '@<span><br role="presentation"/></span>@', '', $paragraph );
+		$paragraph = preg_replace( '@<span[^>]+>@', '', $paragraph );
+		$paragraph = preg_replace( '@</span>@', '', $paragraph );
+		$content   = '<!-- wp:paragraph -->';
+		$content  .= PHP_EOL;
+		$content  .= $paragraph;
+		$content  .= '<!-- /wp:paragraph -->';
+		$content  .= PHP_EOL;
+		$content  .= PHP_EOL;
+		return $content;
+	}
+
+	protected function write_orginal_images_list() {
+			$file = sprintf(
+				'%s/content/wget.images.list',
+				$this->root,
+			);
+			$fw   = fopen( $file, 'w' );
+		foreach ( $this->orginal_images as $content ) {
+			$content .= PHP_EOL;
+			fputs( $fw, $content, strlen( $content ) );
+		}
+			fclose( $fw );
 	}
 }

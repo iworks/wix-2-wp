@@ -15,7 +15,6 @@ class iworks_wix2wp_posts extends iworks_wix2wp_common {
 
 	public function __construct() {
 		parent::__construct();
-
 		$this->items = $this->get_items();
 	}
 
@@ -39,13 +38,20 @@ class iworks_wix2wp_posts extends iworks_wix2wp_common {
 			if ( isset( $config->posts ) && isset( $config->posts->limit ) ) {
 				$this->split = $config->posts->limit;
 			}
+			if ( 1 > $this->split ) {
+				$this->split = PHP_INT_MAX;
+			}
 			$this->wxr->mode = 'return';
 			$content         = '';
 			foreach ( $this->items as $one ) {
 				if ( 0 == $this->counter || 0 == $this->counter % $this->split ) {
 					if ( $content ) {
 						$content .= $this->wxr->foot();
-						$file     = sprintf( '/tmp/import.posts.%03d.xml', ceil( $this->counter / $this->split ) );
+						$file     = sprintf(
+							'%s/content/import.posts.%03d.xml',
+							$this->root,
+							ceil( $this->counter / $this->split )
+						);
 						print $file . PHP_EOL;
 						$fw = fopen( $file, 'w' );
 						fputs( $fw, $content, strlen( $content ) );
@@ -63,12 +69,17 @@ class iworks_wix2wp_posts extends iworks_wix2wp_common {
 				$this->counter++;
 			}
 			$content .= $this->wxr->foot();
-			$file     = sprintf( '/tmp/import.posts.%03d.xml', ceil( $this->counter / $this->split ) );
+			$file     = sprintf(
+				'%s/content/import.posts.%03d.xml',
+				$this->root,
+				ceil( $this->counter / $this->split )
+			);
 			print $file . PHP_EOL;
 			$fw = fopen( $file, 'w' );
 			fputs( $fw, $content, strlen( $content ) );
 			fclose( $fw );
 		}
+		$this->write_orginal_images_list();
 	}
 
 	protected function get_items() {
