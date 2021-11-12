@@ -2,7 +2,7 @@
 
 require_once dirname( __FILE__ ) . '/common.php';
 
-class iworks_default_parse extends iworks_default_common {
+class iworks_wix2wp_posts extends iworks_wix2wp_common {
 
 	private $categories = array(
 		array(
@@ -15,6 +15,7 @@ class iworks_default_parse extends iworks_default_common {
 
 	public function __construct() {
 		parent::__construct();
+
 		$this->items = $this->get_items();
 	}
 
@@ -44,7 +45,7 @@ class iworks_default_parse extends iworks_default_common {
 				if ( 0 == $this->counter || 0 == $this->counter % $this->split ) {
 					if ( $content ) {
 						$content .= $this->wxr->foot();
-						$file     = sprintf( '/tmp/import.news.%03d.xml', ceil( $this->counter / $this->split ) );
+						$file     = sprintf( '/tmp/import.posts.%03d.xml', ceil( $this->counter / $this->split ) );
 						print $file . PHP_EOL;
 						$fw = fopen( $file, 'w' );
 						fputs( $fw, $content, strlen( $content ) );
@@ -62,7 +63,7 @@ class iworks_default_parse extends iworks_default_common {
 				$this->counter++;
 			}
 			$content .= $this->wxr->foot();
-			$file     = sprintf( '/tmp/import.news.%03d.xml', ceil( $this->counter / $this->split ) );
+			$file     = sprintf( '/tmp/import.posts.%03d.xml', ceil( $this->counter / $this->split ) );
 			print $file . PHP_EOL;
 			$fw = fopen( $file, 'w' );
 			fputs( $fw, $content, strlen( $content ) );

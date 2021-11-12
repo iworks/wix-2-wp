@@ -13,9 +13,6 @@ $vendor = $root . '/lib';
  * read options
  */
 $options = getopt( 'd:c:' );
-if ( ! isset( $options['c'] ) || ! is_string( $options['c'] ) ) {
-	$options['c'] = 'default';
-}
 
 if ( ! isset( $options['d'] ) || empty( $options['d'] ) ) {
 	echo 'please add directory to read';
@@ -34,11 +31,17 @@ if ( ! is_dir( $options['d'] ) ) {
 /**
  * configuration
  */
-$config_file = sprintf( '%s/etc/%s.json', $root, $options['c'] );
+$config_file = sprintf( '%s/etc/config.json', $root );
 if ( ! is_file( $config_file ) || ! is_readable( $config_file ) ) {
-	die( sprintf( 'File "%s" does not exists or is not readable!', $config_file ) );
+	printf( 'File "%s" does not exists or is not readable!', $config_file );
+	echo PHP_EOL;
+	echo 'Please copy etc/config-example.json into etc/config.json and set up it first!';
+	echo PHP_EOL;
+	exit;
+
 }
-$config = json_decode( file_get_contents( $config_file ) );
+$config          = json_decode( file_get_contents( $config_file ) );
+$config->service = 'wix2wp';
 
 /**
  * common

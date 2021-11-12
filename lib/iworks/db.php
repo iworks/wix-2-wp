@@ -1,6 +1,6 @@
 <?php
-class iworks_db
-{
+class iworks_db {
+
 	public $db;
 
 	public function __construct() {
@@ -13,8 +13,8 @@ class iworks_db
 
 		$dbconfig = $config->database;
 
-		if ( isset( $config->{'database-'.$hostname} ) ) {
-			$dbconfig = $config->{'database-'.$hostname };
+		if ( isset( $config->{'database-' . $hostname} ) ) {
+			$dbconfig = $config->{'database-' . $hostname };
 		}
 
 		$pdo = sprintf(
@@ -40,13 +40,13 @@ class iworks_db
 		 * where
 		 */
 		if ( ! empty( $where ) ) {
-			$sql .= ' where '. $where;
+			$sql .= ' where ' . $where;
 		}
 		/**
 		 * order
 		 */
 		if ( $order ) {
-			$sql .= ' order by '.$order;
+			$sql .= ' order by ' . $order;
 		} else {
 			/**
 			 * random

@@ -1,0 +1,29 @@
+{
+    "runners": {
+        "posts":      true,
+        "pages":      true
+    },
+    "database": {
+        "dbhost": "localhost",
+        "dbname": "dbname",
+        "dbuser": "dbuser",
+        "dbpass": "dbpass",
+        "exec_on_connect": "SET CHARACTER_SET_RESULTS=UTF8"
+    },
+    "site": {
+        "title": "Wix 2 WP",
+        "link": "https://example.com/",
+        "description": "Site tagline",
+        "wp_prefix": "wp_"
+    },
+    "mode": "split",
+    "posts": {
+        "limit": 50,
+        "random": false
+    },
+    "pages": {
+        "limit": 50,
+        "random": false
+    }
+}
+

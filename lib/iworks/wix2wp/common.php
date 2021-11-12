@@ -1,19 +1,21 @@
 <?php
 
-require_once dirname( dirname( __FILE__ ) ) . '/default.php';
 require_once dirname( dirname( __FILE__ ) ) . '/wxr.php';
 
-abstract class iworks_default_common {
+abstract class iworks_wix2wp_common {
 
 	protected $db;
 	protected $wxr;
 	protected $limit  = 0;
 	protected $random = false;
 	protected $users  = array();
+	protected $config;
 
 	public function __construct() {
-		$this->db  = new iworks_default();
-		$this->wxr = new iworks_wxr();
+		global $config;
+		$this->config = $config;
+		$this->db     = new iworks_default();
+		$this->wxr    = new iworks_wxr();
 	}
 
 	abstract protected function get_items();
@@ -138,6 +140,7 @@ abstract class iworks_default_common {
 			'lut' => 'Feb',
 			'mar' => 'Mar',
 			'kwi' => 'Apr',
+			'maj' => 'May',
 			'cze' => 'Jun',
 			'lip' => 'Jul',
 			'sie' => 'Aug',
@@ -164,5 +167,11 @@ abstract class iworks_default_common {
 		);
 		$this->users[ $id ]       = $this->users[ $username ];
 		return $id;
+	}
+
+	protected function get_first_available_posts_id() {
+		global $wpdb;
+		$query = "select max(ID) + 1 from {$wpdb->posts}";
+		$var   = $wpdb->gett_var( $query );
 	}
 }
